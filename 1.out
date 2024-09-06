@@ -1,0 +1,9 @@
+/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/callbacks.py:607: UserWarning: This overload of add is deprecated:
+	add(Number alpha, Tensor other)
+Consider using one of the following signatures instead:
+	add(Tensor other, *, Number alpha) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)
+  p.data = p.data.add(-weight_decay * eta, p.data)
+Traceback (most recent call last):
+  File "simulation_run.py", line 63, in <module>
+    latex_table = r"""
+KeyError: 'table'

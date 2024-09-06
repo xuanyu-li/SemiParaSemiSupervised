@@ -1,0 +1,65 @@
+/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/callbacks.py:607: UserWarning: This overload of add is deprecated:
+	add(Number alpha, Tensor other)
+Consider using one of the following signatures instead:
+	add(Tensor other, *, Number alpha) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)
+  p.data = p.data.add(-weight_decay * eta, p.data)
+simulation_run.py:49: FutureWarning: In future versions `DataFrame.to_latex` is expected to utilise the base implementation of `Styler.to_latex` for formatting and rendering. The arguments signature may therefore change. It is recommended instead to use `DataFrame.style.to_latex` which also contains additional functionality.
+  print(results_df.to_latex())
+                                             d=5  ...            d=20
+n_unlabeled=1000 - paramsLin                 NaN  ...             NaN
+n_unlabeled=1000 - deepCoefEst               NaN  ...             NaN
+n_unlabeled=1000 - DMLCoefEst                NaN  ...             NaN
+n_unlabeled=1000 - SSDMLCoefEst              NaN  ...             NaN
+n_unlabeled=5000 - paramsLin                 NaN  ...             NaN
+n_unlabeled=5000 - deepCoefEst               NaN  ...             NaN
+n_unlabeled=5000 - DMLCoefEst                NaN  ...             NaN
+n_unlabeled=5000 - SSDMLCoefEst              NaN  ...             NaN
+n_unlabeled=10000 - paramsLin                NaN  ...             NaN
+n_unlabeled=10000 - deepCoefEst              NaN  ...             NaN
+n_unlabeled=10000 - DMLCoefEst               NaN  ...             NaN
+n_unlabeled=10000 - SSDMLCoefEst             NaN  ...             NaN
+n=1000 - paramsLin                1.4155(0.0076)  ...  1.8279(0.0090)
+n=1000 - deepCoefEst              1.2482(0.0077)  ...  1.5523(0.0099)
+n=1000 - DMLCoefEst               1.2342(0.0242)  ...  1.2274(0.0175)
+n=1000 - SSDMLCoefEst             1.1401(0.0258)  ...  1.1994(0.0172)
+n=5000 - paramsLin                1.4137(0.0030)  ...  1.8208(0.0036)
+n=5000 - deepCoefEst              1.0477(0.0034)  ...  1.1100(0.0037)
+n=5000 - DMLCoefEst               1.1142(0.0133)  ...  1.1828(0.0098)
+n=5000 - SSDMLCoefEst             1.0899(0.0166)  ...  1.1206(0.0114)
+n=10000 - paramsLin               1.4185(0.0023)  ...  1.8211(0.0026)
+n=10000 - deepCoefEst             1.0169(0.0017)  ...  1.0581(0.0029)
+n=10000 - DMLCoefEst              1.0603(0.0140)  ...  1.1331(0.0107)
+n=10000 - SSDMLCoefEst            1.0559(0.0125)  ...  1.1011(0.0102)
+
+[24 rows x 4 columns]
+\begin{tabular}{lllll}
+\toprule
+{} &             d=5 &            d=10 &            d=15 &            d=20 \\
+\midrule
+n\_unlabeled=1000 - paramsLin     &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=1000 - deepCoefEst   &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=1000 - DMLCoefEst    &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=1000 - SSDMLCoefEst  &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=5000 - paramsLin     &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=5000 - deepCoefEst   &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=5000 - DMLCoefEst    &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=5000 - SSDMLCoefEst  &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=10000 - paramsLin    &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=10000 - deepCoefEst  &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=10000 - DMLCoefEst   &             NaN &             NaN &             NaN &             NaN \\
+n\_unlabeled=10000 - SSDMLCoefEst &             NaN &             NaN &             NaN &             NaN \\
+n=1000 - paramsLin               &  1.4155(0.0076) &  1.3991(0.0062) &  1.9074(0.0066) &  1.8279(0.0090) \\
+n=1000 - deepCoefEst             &  1.2482(0.0077) &  1.2762(0.0070) &  1.5853(0.0120) &  1.5523(0.0099) \\
+n=1000 - DMLCoefEst              &  1.2342(0.0242) &  1.2190(0.0174) &  1.2159(0.0152) &  1.2274(0.0175) \\
+n=1000 - SSDMLCoefEst            &  1.1401(0.0258) &  1.1707(0.0174) &  1.1674(0.0148) &  1.1994(0.0172) \\
+n=5000 - paramsLin               &  1.4137(0.0030) &  1.3943(0.0027) &  1.9036(0.0032) &  1.8208(0.0036) \\
+n=5000 - deepCoefEst             &  1.0477(0.0034) &  1.0535(0.0033) &  1.1010(0.0036) &  1.1100(0.0037) \\
+n=5000 - DMLCoefEst              &  1.1142(0.0133) &  1.1547(0.0110) &  1.1569(0.0098) &  1.1828(0.0098) \\
+n=5000 - SSDMLCoefEst            &  1.0899(0.0166) &  1.1227(0.0107) &  1.1128(0.0124) &  1.1206(0.0114) \\
+n=10000 - paramsLin              &  1.4185(0.0023) &  1.3896(0.0019) &  1.8987(0.0021) &  1.8211(0.0026) \\
+n=10000 - deepCoefEst            &  1.0169(0.0017) &  1.0227(0.0015) &  1.0438(0.0024) &  1.0581(0.0029) \\
+n=10000 - DMLCoefEst             &  1.0603(0.0140) &  1.1124(0.0106) &  1.1075(0.0091) &  1.1331(0.0107) \\
+n=10000 - SSDMLCoefEst           &  1.0559(0.0125) &  1.0829(0.0090) &  1.0777(0.0099) &  1.1011(0.0102) \\
+\bottomrule
+\end{tabular}
+

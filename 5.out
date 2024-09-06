@@ -1,0 +1,36 @@
+/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/callbacks.py:607: UserWarning: This overload of add is deprecated:
+	add(Number alpha, Tensor other)
+Consider using one of the following signatures instead:
+	add(Tensor other, *, Number alpha) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)
+  p.data = p.data.add(-weight_decay * eta, p.data)
+                                             d=5  ...            d=20
+n_unlabeled=1000 - paramsLin      0.4072(0.1035)  ...  0.8376(0.1117)
+n_unlabeled=1000 - deepCoefEst    0.2453(0.1203)  ...  0.5594(0.1209)
+n_unlabeled=1000 - DMLCoefEst     0.2349(0.3554)  ...  0.2497(0.2433)
+n_unlabeled=1000 - SSDMLCoefEst   0.1548(0.3383)  ...  0.2152(0.2467)
+n_unlabeled=5000 - paramsLin      0.4146(0.1004)  ...  0.8237(0.1043)
+n_unlabeled=5000 - deepCoefEst    0.2515(0.1173)  ...  0.5659(0.1177)
+n_unlabeled=5000 - DMLCoefEst     0.2771(0.3696)  ...  0.2516(0.2406)
+n_unlabeled=5000 - SSDMLCoefEst   0.1098(0.3318)  ...  0.2067(0.2168)
+n_unlabeled=10000 - paramsLin     0.4059(0.1045)  ...  0.8387(0.1066)
+n_unlabeled=10000 - deepCoefEst   0.2444(0.1080)  ...  0.5633(0.1264)
+n_unlabeled=10000 - DMLCoefEst    0.2451(0.3798)  ...  0.2436(0.2381)
+n_unlabeled=10000 - SSDMLCoefEst  0.1131(0.3741)  ...  0.1347(0.2525)
+
+[12 rows x 4 columns]
+\begin{tabular}{lllll}
+ & d=5 & d=10 & d=15 & d=20 \\
+n_unlabeled=1000 - paramsLin & 0.4072(0.1035) & 0.3913(0.0884) & 0.9128(0.0947) & 0.8376(0.1117) \\
+n_unlabeled=1000 - deepCoefEst & 0.2453(0.1203) & 0.2803(0.1071) & 0.5946(0.1720) & 0.5594(0.1209) \\
+n_unlabeled=1000 - DMLCoefEst & 0.2349(0.3554) & 0.1943(0.2376) & 0.1944(0.2106) & 0.2497(0.2433) \\
+n_unlabeled=1000 - SSDMLCoefEst & 0.1548(0.3383) & 0.1625(0.2356) & 0.1718(0.2117) & 0.2152(0.2467) \\
+n_unlabeled=5000 - paramsLin & 0.4146(0.1004) & 0.3883(0.0914) & 0.9049(0.1006) & 0.8237(0.1043) \\
+n_unlabeled=5000 - deepCoefEst & 0.2515(0.1173) & 0.2588(0.1015) & 0.5895(0.1737) & 0.5659(0.1177) \\
+n_unlabeled=5000 - DMLCoefEst & 0.2771(0.3696) & 0.1915(0.2597) & 0.2036(0.2213) & 0.2516(0.2406) \\
+n_unlabeled=5000 - SSDMLCoefEst & 0.1098(0.3318) & 0.1355(0.2657) & 0.1206(0.2337) & 0.2067(0.2168) \\
+n_unlabeled=10000 - paramsLin & 0.4059(0.1045) & 0.3910(0.0857) & 0.9047(0.1013) & 0.8387(0.1066) \\
+n_unlabeled=10000 - deepCoefEst & 0.2444(0.1080) & 0.2773(0.1056) & 0.5863(0.1732) & 0.5633(0.1264) \\
+n_unlabeled=10000 - DMLCoefEst & 0.2451(0.3798) & 0.2023(0.2536) & 0.2225(0.2180) & 0.2436(0.2381) \\
+n_unlabeled=10000 - SSDMLCoefEst & 0.1131(0.3741) & 0.1023(0.2339) & 0.1208(0.2551) & 0.1347(0.2525) \\
+\end{tabular}
+

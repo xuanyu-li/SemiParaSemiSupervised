@@ -1,0 +1,25 @@
+/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/callbacks.py:607: UserWarning: This overload of add is deprecated:
+	add(Number alpha, Tensor other)
+Consider using one of the following signatures instead:
+	add(Tensor other, *, Number alpha) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)
+  p.data = p.data.add(-weight_decay * eta, p.data)
+Traceback (most recent call last):
+  File "simulation_run.py", line 42, in <module>
+    means, std_dev = run_simulation(n, n_unlabeled_values, d, num_reps)
+  File "simulation_run.py", line 8, in run_simulation
+    outcomes = Single_trial(n,n_unlabeled,d,typenum,batch_size,nodes,lr,epochs,verbose,sparseRatio)
+  File "/home/officer/lxy/dplqr-main/g_deepPLR.py", line 145, in Single_trial
+    z_ss_delta, z_ss_merge, model_ss_m = m_deepfit(x_ss_train, x_ss_val, nodes, batch_size*n_unlabel/n, lr, epochs, verbose)
+  File "/home/officer/lxy/dplqr-main/g_deepPLR.py", line 52, in m_deepfit
+    model_m.fit(x_n_train, z_train, batch_size, epochs, callbacks, verbose,
+  File "/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/base.py", line 288, in fit
+    dataloader = self.make_dataloader(input, batch_size, shuffle, num_workers, **kwargs)
+  File "/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/base.py", line 136, in make_dataloader
+    dataloader = make_dataloader(data, batch_size, shuffle, num_workers, **kwargs)
+  File "/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/tupletree.py", line 361, in make_dataloader
+    dataloader = DataLoader(dataset, batch_size, shuffle=shuffle, num_workers=num_workers)
+  File "/usr/local/anaconda3/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 357, in __init__
+    batch_sampler = BatchSampler(sampler, batch_size, drop_last)
+  File "/usr/local/anaconda3/lib/python3.8/site-packages/torch/utils/data/sampler.py", line 232, in __init__
+    raise ValueError("batch_size should be a positive integer value, "
+ValueError: batch_size should be a positive integer value, but got batch_size=128.0

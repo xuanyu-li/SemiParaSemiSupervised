@@ -1,0 +1,24 @@
+/usr/local/anaconda3/lib/python3.8/site-packages/torchtuples/callbacks.py:607: UserWarning: This overload of add is deprecated:
+	add(Number alpha, Tensor other)
+Consider using one of the following signatures instead:
+	add(Tensor other, *, Number alpha) (Triggered internally at ../torch/csrc/utils/python_arg_parser.cpp:1485.)
+  p.data = p.data.add(-weight_decay * eta, p.data)
+                                             d=5  ...            d=20
+paramsLin                         0.4286(0.0915)  ...  0.8305(0.1225)
+deepCoefEst                       0.2567(0.1045)  ...  0.5640(0.1223)
+DMLCoefEst                        0.2674(0.3538)  ...  0.2316(0.2367)
+n_unlabeled=1000 - SSDMLCoefEst   0.2038(0.3224)  ...  0.1966(0.2283)
+n_unlabeled=5000 - SSDMLCoefEst   0.1583(0.3616)  ...  0.1933(0.2331)
+n_unlabeled=10000 - SSDMLCoefEst  0.1211(0.3821)  ...  0.1535(0.2639)
+
+[6 rows x 4 columns]
+\begin{tabular}{lllll}
+ & d=5 & d=10 & d=15 & d=20 \\
+paramsLin & 0.4286(0.0915) & 0.3855(0.0892) & 0.8949(0.1048) & 0.8305(0.1225) \\
+deepCoefEst & 0.2567(0.1045) & 0.2691(0.0922) & 0.5570(0.1570) & 0.5640(0.1223) \\
+DMLCoefEst & 0.2674(0.3538) & 0.1800(0.2725) & 0.1894(0.1979) & 0.2316(0.2367) \\
+n_unlabeled=1000 - SSDMLCoefEst & 0.2038(0.3224) & 0.1644(0.2676) & 0.1427(0.2176) & 0.1966(0.2283) \\
+n_unlabeled=5000 - SSDMLCoefEst & 0.1583(0.3616) & 0.1418(0.2551) & 0.1138(0.2211) & 0.1933(0.2331) \\
+n_unlabeled=10000 - SSDMLCoefEst & 0.1211(0.3821) & 0.1413(0.2593) & 0.0864(0.2237) & 0.1535(0.2639) \\
+\end{tabular}
+
