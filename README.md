@@ -1,4 +1,4 @@
-# Semi-parametric Semi-supervised Longitudinal Estimation
+# Semi-parametric Semi-supervised Partially Linear Estimation
 
 This repository contains simulation code for estimating a partially linear treatment effect with supervised, semi-supervised, and nonparametric nuisance estimators on synthetic data.
 
