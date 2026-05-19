@@ -32,7 +32,7 @@ def m2(w,d):
     return (m2_result[0])**2 +  m2_result[1] * np.sin(m2_result[2])
 
 # Function for g3 and m3
-def g3(W, alpha):
+def m3(W, alpha):
     #gammas = [0, 3, 6, 9, 10, 16]
     gammas = [0, 3, 6, 9, 10, 16]
     R = 1
@@ -51,7 +51,7 @@ def g3(W, alpha):
     y = np.mean(wv_trans_W, axis=1)
     return y
 
-def m3(W, alpha):
+def g3(W, alpha):
     #gammas = [0, 3, 6, 9, 10, 16]
     gammas = [0, 3, 6, 9, 10, 16]
     R = 1

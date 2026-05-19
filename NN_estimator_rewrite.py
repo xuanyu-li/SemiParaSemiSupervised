@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from itertools import product
 import numpy as np
 import scipy
 import torch
 import pandas as pd
 import shutil
 import uuid
+import warnings
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -26,6 +28,24 @@ logging.getLogger("lightning.pytorch").setLevel(logging.ERROR)
 
 # Some submodules still log under this name internally
 logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
+
+# Silence repetitive Lightning/PyTorch runtime warnings during repeated training.
+warnings.filterwarnings(
+    "ignore",
+    message=r".*does not have many workers which may be a bottleneck.*",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*You are using `torch\.load` with `weights_only=False`.*",
+)
+
+
+def _single_process_trainer_kwargs():
+    return {
+        "accelerator": "auto",
+        "devices": 1,
+        "num_nodes": 1,
+    }
 
 
 # training Deep Partially Linear Regression (DPLR)
@@ -83,7 +103,8 @@ def g_deepfit(
         enable_model_summary=False,
         callbacks=callbacks,
         enable_progress_bar=bool(verbose),
-        deterministic=True
+        deterministic=True,
+        **_single_process_trainer_kwargs(),
     )
     trainer.fit(pl_module, train_dataloaders=train_loader, val_dataloaders=val_loader)
     best_ckpt_path = checkpoint_cb.best_model_path
@@ -100,11 +121,23 @@ def g_deepfit(
     shutil.rmtree(run_checkpoint_dir, ignore_errors=True)
 
     return deepCoefEst, best_module.net, paramsLin
- 
-def neural_network_fit(x_train, y_train, val_data, sparseRatio, nodes, batch_size, lr, epochs, verbose,
-                       weight_decay=0.0,
-                       patience=15, min_delta=0.0,
-                       checkpoint_dir="checkpoints_mnet_fit"):
+
+
+def _fit_m_network(
+    x_train,
+    y_train,
+    val_data,
+    sparseRatio,
+    nodes,
+    batch_size,
+    lr,
+    epochs,
+    verbose,
+    weight_decay=0.0,
+    patience=15,
+    min_delta=0.0,
+    checkpoint_dir="checkpoints_mnet_fit",
+):
     dim_nonpar = x_train.size()[1]
     net = mNet(dim_nonpar, nodes, sparseRatio=sparseRatio)
     pl_module = MNetLightning(net, lr, weight_decay=weight_decay)
@@ -143,6 +176,7 @@ def neural_network_fit(x_train, y_train, val_data, sparseRatio, nodes, batch_siz
         enable_progress_bar=bool(verbose),
         deterministic=True,
         log_every_n_steps=50,
+        **_single_process_trainer_kwargs(),
     )
 
     trainer.fit(pl_module, train_dataloaders=train_loader, val_dataloaders=val_loader)
@@ -155,8 +189,74 @@ def neural_network_fit(x_train, y_train, val_data, sparseRatio, nodes, batch_siz
     best_module = MNetLightning.load_from_checkpoint(
         best_ckpt_path, net=best_net, lr=lr, weight_decay=weight_decay, map_location="cpu"
     )
+    best_val_loss = float(checkpoint_cb.best_model_score.item())
     shutil.rmtree(run_checkpoint_dir, ignore_errors=True)
-    return best_module.net
+    return best_module.net, best_val_loss
+
+
+def neural_network_fit(
+    x_train,
+    y_train,
+    val_data,
+    sparseRatio,
+    nodes,
+    batch_size,
+    lr,
+    epochs,
+    verbose,
+    weight_decay=0.0,
+    patience=15,
+    min_delta=0.0,
+    checkpoint_dir="checkpoints_mnet_fit",
+):
+    model, _ = _fit_m_network(
+        x_train=x_train,
+        y_train=y_train,
+        val_data=val_data,
+        sparseRatio=sparseRatio,
+        nodes=nodes,
+        batch_size=batch_size,
+        lr=lr,
+        epochs=epochs,
+        verbose=verbose,
+        weight_decay=weight_decay,
+        patience=patience,
+        min_delta=min_delta,
+        checkpoint_dir=checkpoint_dir,
+    )
+    return model
+
+
+def neural_network_fit_with_val_loss(
+    x_train,
+    y_train,
+    val_data,
+    sparseRatio,
+    nodes,
+    batch_size,
+    lr,
+    epochs,
+    verbose,
+    weight_decay=0.0,
+    patience=15,
+    min_delta=0.0,
+    checkpoint_dir="checkpoints_mnet_fit",
+):
+    return _fit_m_network(
+        x_train=x_train,
+        y_train=y_train,
+        val_data=val_data,
+        sparseRatio=sparseRatio,
+        nodes=nodes,
+        batch_size=batch_size,
+        lr=lr,
+        epochs=epochs,
+        verbose=verbose,
+        weight_decay=weight_decay,
+        patience=patience,
+        min_delta=min_delta,
+        checkpoint_dir=checkpoint_dir,
+    )
 
 def prepare_tensors(df: pd.DataFrame):
     """
@@ -229,6 +329,182 @@ def semi_supervised_neural_network_unlabeled_only(df, kfsplit, n_unlabel, df_unl
             mhat[test_idx, n_unlabel_list.index(n_u)] = preds_ss
 
     return mhat
+
+
+def select_semi_supervised_unlabeled_only_hyperparameters(
+    df_unlabel_all,
+    n_unlabel_grid,
+    layer_grid,
+    width_grid,
+    sparseRatio,
+    batch_size,
+    lr,
+    epochs,
+    verbose=False,
+    weight_decay=0.0,
+    patience=15,
+    min_delta=0.0,
+    val_size=0.2,
+    random_state=42,
+    checkpoint_dir="checkpoints_mnet_fit",
+):
+    """
+    Fit one m-network for each candidate combination of:
+    - unlabeled sample size (`n_unlabel_grid`)
+    - number of hidden layers (`layer_grid`)
+    - hidden width (`width_grid`)
+
+    The score for each candidate is the best validation loss achieved under
+    early stopping. The candidate with the smallest validation loss is returned.
+    """
+    n_unlabel_list = [n_unlabel_grid] if np.isscalar(n_unlabel_grid) else list(n_unlabel_grid)
+    layer_list = [layer_grid] if np.isscalar(layer_grid) else list(layer_grid)
+    width_list = [width_grid] if np.isscalar(width_grid) else list(width_grid)
+
+    if len(n_unlabel_list) == 0 or len(layer_list) == 0 or len(width_list) == 0:
+        raise ValueError("All hyperparameter grids must contain at least one value.")
+    if len(df_unlabel_all) == 0:
+        raise ValueError("df_unlabel_all must contain at least one unlabeled observation.")
+
+    tuning_records = []
+    best_model = None
+    best_config = None
+    best_val_loss = np.inf
+
+    for n_u, num_layers, width in product(n_unlabel_list, layer_list, width_list):
+        n_u = int(n_u)
+        num_layers = int(num_layers)
+        width = int(width)
+
+        if n_u <= 1:
+            raise ValueError("Each n_unlabel candidate must be at least 2.")
+        if n_u > len(df_unlabel_all):
+            raise ValueError(
+                f"n_unlabel candidate {n_u} exceeds the available unlabeled sample size {len(df_unlabel_all)}."
+            )
+        if num_layers <= 0 or width <= 0:
+            raise ValueError("Layer and width candidates must be strictly positive.")
+
+        df_ss = df_unlabel_all.iloc[:n_u].reset_index(drop=True)
+        df_ss_tr, df_ss_va = train_test_split(
+            df_ss,
+            test_size=val_size,
+            random_state=random_state,
+            shuffle=True,
+        )
+
+        x_tr, _ = prepare_tensors(df_ss_tr)
+        x_va, _ = prepare_tensors(df_ss_va)
+        val_data = (x_va[1], x_va[0].view(x_va[0].size()[0], 1))
+        model_ss_m, candidate_val_loss = neural_network_fit_with_val_loss(
+            x_train=x_tr[1],
+            y_train=x_tr[0].view(x_tr[0].size()[0], 1),
+            val_data=val_data,
+            sparseRatio=sparseRatio,
+            nodes=[num_layers, width],
+            batch_size=batch_size,
+            lr=lr,
+            epochs=epochs,
+            verbose=verbose,
+            weight_decay=weight_decay,
+            patience=patience,
+            min_delta=min_delta,
+            checkpoint_dir=checkpoint_dir,
+        )
+
+        record = {
+            "n_unlabel": n_u,
+            "num_hidden_layers": num_layers,
+            "nodes_per_layer": width,
+            "best_val_loss": float(candidate_val_loss),
+        }
+        tuning_records.append(record)
+
+        if candidate_val_loss < best_val_loss:
+            best_val_loss = float(candidate_val_loss)
+            best_model = model_ss_m
+            best_config = record.copy()
+
+    if best_model is None or best_config is None:
+        raise RuntimeError("Hyperparameter search did not produce a valid model.")
+
+    return best_model, best_config, pd.DataFrame(tuning_records)
+
+
+def semi_supervised_neural_network_unlabeled_only_tuned(
+    df,
+    kfsplit,
+    n_unlabel_grid,
+    df_unlabel_all,
+    sparseRatio,
+    layer_grid,
+    width_grid,
+    batch_size,
+    lr,
+    epochs,
+    verbose=False,
+    weight_decay=0.0,
+    patience=15,
+    min_delta=0.0,
+    val_size=0.2,
+    random_state=42,
+    checkpoint_dir="checkpoints_mnet_fit",
+    return_tuning_results=False,
+):
+    """
+    Cross-fitted semi-supervised m-hat using unlabeled data only, with
+    hyperparameter selection over unlabeled sample size, hidden layers, and width.
+
+    For each fold:
+    1. train every candidate on an unlabeled train split,
+    2. record the best early-stopped validation loss,
+    3. keep the candidate with the smallest validation loss,
+    4. use the selected model to predict m(W) on the held-out labeled fold.
+    """
+    mhat = np.zeros(len(df))
+    tuning_results = []
+    best_configs = []
+
+    for fold_idx, (_, test_idx) in enumerate(kfsplit):
+        df_test = df.iloc[test_idx]
+        x_test, _ = prepare_tensors(df_test)
+
+        fold_seed = None if random_state is None else int(random_state) + fold_idx
+        best_model, best_config, fold_tuning_df = select_semi_supervised_unlabeled_only_hyperparameters(
+            df_unlabel_all=df_unlabel_all,
+            n_unlabel_grid=n_unlabel_grid,
+            layer_grid=layer_grid,
+            width_grid=width_grid,
+            sparseRatio=sparseRatio,
+            batch_size=batch_size,
+            lr=lr,
+            epochs=epochs,
+            verbose=verbose,
+            weight_decay=weight_decay,
+            patience=patience,
+            min_delta=min_delta,
+            val_size=val_size,
+            random_state=fold_seed,
+            checkpoint_dir=checkpoint_dir,
+        )
+
+        preds_ss = predict_net_m(best_model, x_test[1], batch_size).to("cpu").numpy().reshape(-1)
+        mhat[test_idx] = preds_ss
+
+        fold_tuning_df = fold_tuning_df.copy()
+        fold_tuning_df["fold"] = fold_idx
+        tuning_results.append(fold_tuning_df)
+
+        best_config = best_config.copy()
+        best_config["fold"] = fold_idx
+        best_configs.append(best_config)
+
+    if not return_tuning_results:
+        return mhat
+
+    tuning_results_df = pd.concat(tuning_results, ignore_index=True)
+    best_configs_df = pd.DataFrame(best_configs)
+    return mhat, tuning_results_df, best_configs_df
 
 def DML1_estimator(df, kfsplit, ghat, mhat):
     y = df["Y"].to_numpy()
@@ -330,17 +606,14 @@ def Single_trial_cross_fitting_inference(n, N_unlabeled, d, typenum, batch_size,
     mhat_semi_supervised_unlabeled_only = semi_supervised_neural_network_unlabeled_only(df, kfsplit, N_unlabeled, df_unlabel_all,
                                                           sparseRatio, nodes, batch_size*2, lr, epochs, verbose)
      
-    # Traditional nonparametric estimator
-    Yhat_np, Zhat_np = traditional_nonparametric_estimator(df, kfsplit)
+    # Traditional nonparametric estimator using local linear
+    theta_np, var_np = kernelreg_partial_linear_theta(df["Y"].to_numpy(), df["Z"].to_numpy(), df.drop(columns=['Y', 'Z']).to_numpy(), reg_type="ll")
     
     # DML Estimators
     theta_DML2_supervised, var_DML2_supervised = DML2_estimator(df, ghat_supervised, mhat_supervised)
 
     # unlabeled only semi-supervised DML
     theta_DML2_semi_supervised_unlabeled_only, var_DML2_semi_supervised_unlabeled_only = DML2_estimator(df, ghat_supervised, mhat_semi_supervised_unlabeled_only)
-
-    # traditional nonparametric DML estimator
-    theta_np, var_np = DML_partialout(df, Yhat_np, Zhat_np)
 
     # Oracle DML estimator (true m(W), estimated g(W))
     theta_DML_oracle, var_oracle = DML2_estimator(df, ghat_supervised, m_oracle)

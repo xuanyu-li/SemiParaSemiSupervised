@@ -47,14 +47,28 @@ class DPLLightning(pl.LightningModule):
         x_lin, x_nonpar, y = batch
         preds = self(x_lin, x_nonpar)
         loss = self.loss_fn(preds, y)
-        self.log("train_loss", loss, prog_bar=False, on_epoch=True, on_step=False)
+        self.log(
+            "train_loss",
+            loss,
+            prog_bar=False,
+            on_epoch=True,
+            on_step=False,
+            sync_dist=self.trainer.world_size > 1,
+        )
         return loss
 
     def validation_step(self, batch, batch_idx):
         x_lin, x_nonpar, y = batch
         preds = self(x_lin, x_nonpar)
         loss = self.loss_fn(preds, y)
-        self.log("val_loss", loss, prog_bar=False, on_epoch=True, on_step=False)
+        self.log(
+            "val_loss",
+            loss,
+            prog_bar=False,
+            on_epoch=True,
+            on_step=False,
+            sync_dist=self.trainer.world_size > 1,
+        )
         return loss
 
     def configure_optimizers(self):
@@ -81,14 +95,28 @@ class MNetLightning(pl.LightningModule):
         x, y = batch
         preds = self(x)
         loss = self.loss_fn(preds, y)
-        self.log("train_loss", loss, prog_bar=False, on_epoch=True, on_step=False)
+        self.log(
+            "train_loss",
+            loss,
+            prog_bar=False,
+            on_epoch=True,
+            on_step=False,
+            sync_dist=self.trainer.world_size > 1,
+        )
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         preds = self(x)
         loss = self.loss_fn(preds, y)
-        self.log("val_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
+        self.log(
+            "val_loss",
+            loss,
+            prog_bar=True,
+            on_epoch=True,
+            on_step=False,
+            sync_dist=self.trainer.world_size > 1,
+        )
         return loss
 
     def configure_optimizers(self):
